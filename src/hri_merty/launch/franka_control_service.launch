@@ -1,0 +1,26 @@
+<launch>
+    <arg name="initial_reset" default="true"/>
+    <!-- Launch camera -->
+    <include file="$(find encoderless_vs)/launch/rs_encoderless_old.launch">
+        <arg name ="initial_reset" value="$(arg initial_reset)"/>
+    </include>
+
+    <node name="set_auto_exposure_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera enable_auto_exposure False"/>
+    <node name="set_auto_exposure_depth" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/stereo_module enable_auto_exposure False"/>
+
+    
+    <!-- Load parameters -->
+    <!-- <rosparam file="$(find encoderless_vs)/config/franka_config.yaml" command="load"/> -->
+    
+    <!-- Launch binary image -->
+    <node name="binary_image_service" pkg="encoderless_vs" type="franka_bin_svc_server.py" respawn="false" output="screen" />
+
+    <!-- skeletonize and generate control points -->
+    <node name="control_points_gen_service" pkg="encoderless_vs" type="franka_cp_svc_server.py" respawn="false" output="screen" />
+
+    <!-- client node to test the pipeline -->
+    <!-- <node name="control_points_gen_client" pkg="encoderless_vs" type="franka_cp_svc_client.py" respawn="false" output="screen" /> -->
+
+   
+</launch>
+

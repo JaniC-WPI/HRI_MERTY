@@ -1,0 +1,36 @@
+<launch>
+    <!-- Load YAML -->
+    <rosparam file="$(find encoderless_vs)/config/franka_shape_config.yaml" command="load"/>
+    <rosparam file="$(find encoderless_vs)/config/franka_features.yaml" command="load"/>
+
+    <!-- Launch Realsense Camera & marker detection -->
+    <!-- <include file="$(find encoderless_vs)/launch/rs_encoderless.launch"/> -->
+    
+    <!-- Launch the control point generation services -->
+    <include file="$(find encoderless_vs)/launch/franka_control_service.launch"/>
+
+    <!-- Joint publisher interface -->
+    <node name="franka_joint_pub" pkg="encoderless_vs" type="franka_joint_pub" output="screen" />
+    
+    <!-- Jacobian update -->
+    <node name="franka_shape_energy_function_node" pkg="encoderless_vs" type="franka_shape_energy_func_node" output = "screen"/>
+    
+    <!-- Control node -->
+    <node name="franka_shape_vs" pkg="encoderless_vs" type="franka_multiref_shape_vs_node" output="screen" respawn="false" />
+
+    <!-- Data record -->
+    <node name="franka_shape_vs_recorder" pkg="encoderless_vs" type="franka_shape_record_node" output="screen" respawn="false" />
+    <node name="Image_writer" pkg="encoderless_vs" type="img_write.py" output="log" respawn="false" />
+    <node name="depth_writer" pkg="encoderless_vs" type="depth_write.py" output="screen" respawn="false" />
+    
+    <!-- Visualization node -->
+    <node name="franka_shape_vs_vis" pkg="encoderless_vs" type="franka_shape_vs_vis_node.py" output="screen" respawn="false" required="true" />
+    <node name="goal_img_pub" pkg="encoderless_vs" type="franka_goal_img_pub.py" output="screen" respawn="false"/>
+
+    <node name="franka_image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <param name="autosize" value="true" />
+    	<remap from="image" to="/franka/vs/vis" />
+    </node>
+
+</launch>
+

@@ -1,0 +1,8 @@
+prefix=/home/jc-merlab/HRI_MERTY/install
+
+Name: hri_merty
+Description: Description of hri_merty
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

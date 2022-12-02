@@ -1,0 +1,88 @@
+vsbot :
+  # # Publish all joint states -----------------------------------
+  # joint_state_controller:
+  #   type: joint_state_controller/JointStateController
+  #   publish_rate: 30  
+
+  # # Velocity Controllers ------------------------------------
+  # joint1_velocity_controller:
+  #   type: velocity_controllers/JointVelocityController
+  #   joint: joint1
+  #   pid: {p: 100.0, i: 0.01, d: 10.0}                         #pid: {p: 100.0, i: 0.01, d: 10.0}
+  # joint2_velocity_controller:
+  #   type: velocity_controllers/JointVelocityController
+  #   joint: joint2
+  #   pid: {p: 100.0, i: 0.01, d: 10.0}
+  
+  # # Position Controllers ------------------------------------
+  # joint1_position_controller:
+  #   type: velocity_controllers/JointPositionController
+  #   joint: joint1
+  #   pid: {p: 1.0, i: 0.00, d: 0.1}
+
+  # joint2_position_controller:
+  #   type: velocity_controllers/JointPositionController
+  #   joint: joint2
+  #   pid: {p: 1.0, i: 0.00, d: 0.1}
+
+# Jacobian Estimation Parameters ------------------------------------
+  estimation:
+    epsilon: 1.0e-5 # update threshold or convergence condition
+    gamma:  10 # learning rate
+    gamma2: 1 # learning rate during servoing
+    window: 50 # window size
+    amplitude: 0.1 # amplitude for initial sin velocities
+    rate: 10 # initialization loop rate
+    
+  control:
+    saturation: 50
+    no_of_actuators: 2
+    no_of_features: 2
+    gain_sm: -3
+    # rate: 10 # control loop rate
+    thresh: 50 # visual servoing convergence threshold
+    goal_pos_x: 324
+    goal_pos_y: 206
+    # window: 20 # window size
+    # lam: -10.0e-4 # servoing gain
+    lam: -0.4
+
+# Shape Servoing Parameters -------------------------------------------
+  
+  shape_control:
+     
+    no_of_features: 6
+    no_of_actuators: 2
+    num_of_segments: 2
+    degree: 2
+    beta: 1.0 # threshold for selective Jacobian update
+    # joint1_goal: -1.75
+    # joint2_goal: 1.85
+    ############### ref 3 2/18/22 in franka desk ###########
+    # goal_features: [188.64980355218717, 95.64862776116439, 130.0, 65.0] 
+                    # vector for storing goal features
+                    # discarding last two features
+                    # to be consistent with rest of the code
+                    
+
+# Goal Position for End Effector ------------------------------------
+
+  # vs_baseline:
+
+  #    goal_position_x: 96 # x co-ordinates 
+  #    goal_position_y: 166 # Y co-ordinates
+  #    pub_rate: 10 # image Publisher rate
+  #    j2_gain: 1
+  #    j4_gain: 1
+  #    xdot_gain: 0.001
+  #    ydot_gain: 0.001
+
+ # Restriction to Depth skeleton
+
+  depth_baseline:
+  
+    cropper: [0, 0, 640, 460]    # to crop the depth image
+    dmin: 5 # to constrain the minimum intensity for depth image segmentation
+    dmax: 6 # to constrain the maximum intensity for depth image segmentation
+    kernel1: 9
+    kernel2: 9

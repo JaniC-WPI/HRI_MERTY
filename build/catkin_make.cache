@@ -1,0 +1,2 @@
+hri_merty
+-DCATKIN_DEVEL_PREFIX=/home/jc-merlab/HRI_MERTY/devel -DCMAKE_INSTALL_PREFIX=/home/jc-merlab/HRI_MERTY/install -G Unix Makefiles
