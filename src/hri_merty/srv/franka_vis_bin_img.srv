@@ -1,0 +1,6 @@
+int64 input
+---
+sensor_msgs/Image img
+std_msgs/Float32MultiArray base
+std_msgs/Float32MultiArray ee
+sensor_msgs/Image rgb
