@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# tutorial: https://www.geeksforgeeks.org/python-text-to-speech-pyttsx-module/ 
+# how to use pyttsx3: https://pyttsx3.readthedocs.io/en/latest/engine.html#examples 
 
 # must run pip install pyttsx3 before using this code:
 import pyttsx3
