@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 # https://pyttsx3.readthedocs.io/en/latest/engine.html#examples 
+# https://github.com/D4rkdev1987/virtual-assistant/blob/master/virtualassistant.py 
 
 import speech_recognition as sr
 import keyboard
 import pyttsx3
+import time
 
 # set up speech recognition object
 r = sr.Recognizer()
@@ -26,10 +28,12 @@ engine.connect('finished-utterance', onEnd)
 
 # sets up the audio recording command, prints the text to the terminal window
 def decipher_speech(r, wait_time):
+    # engine.say("Please say your command:")
+    # engine.runAndWait()
     with sr.Microphone() as source:
         print("Please say your command:")
         # engine.say("Please say your command:")
-        # engine.runAndWait()
+        # engine.runAndWait()    
         # read the audio data from the default microphone
         audio_data = r.record(source, duration=wait_time)
         print("Recognizing...")
@@ -49,4 +53,4 @@ keyboard.add_hotkey('space', lambda: decipher_speech(r,wait_time))
 # remind user of the hotkey definition
 print("Please press the spacebar to talk, max message time:", wait_time, "seconds")  
 # loop repeatedly, waiting for keypress
-keyboard.wait()
+keyboard.wait('esc') 

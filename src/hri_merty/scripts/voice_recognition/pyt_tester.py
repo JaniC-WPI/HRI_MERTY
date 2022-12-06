@@ -12,5 +12,6 @@ engine = pyttsx3.init()
 engine.connect('started-utterance', onStart)
 engine.connect('started-word', onWord)
 engine.connect('finished-utterance', onEnd)
-engine.say('The quick brown fox jumped over the lazy dog.')
-engine.runAndWait()
+for i in range(2):
+   engine.say('The quick brown fox jumped over the lazy dog.')
+   engine.runAndWait()
