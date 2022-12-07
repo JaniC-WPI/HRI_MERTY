@@ -35,7 +35,7 @@ function [phtm] = getPandaHTM(q, tftree)
 %     R3 = Rz_(q(1)+pi);
 %     T_1_3 = [R3 T_utorso_lclav(1:3,4); 0 0 0 1];
     
-    
+    phtm = 0;
     
     % Panda HTM obtained
-    phtm = T_0_1*T_1_2*T_4_5*T_1_3*T_3_4*T_4_5*T_5_6*T_6_7*T_7_8*T_8_9*T_llhand_lpalm*T_lpalm_lee;
+%     phtm = T_0_1*T_1_2*T_4_5*T_1_3*T_3_4*T_4_5*T_5_6*T_6_7*T_7_8*T_8_9*T_llhand_lpalm*T_lpalm_lee;

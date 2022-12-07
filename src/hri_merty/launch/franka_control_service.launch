@@ -1,23 +1,17 @@
 <launch>
-    <arg name="initial_reset" default="true"/>
-    <!-- Launch camera -->
-    <include file="$(find encoderless_vs)/launch/rs_encoderless_old.launch">
-        <arg name ="initial_reset" value="$(arg initial_reset)"/>
-    </include>
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
 
     <node name="set_auto_exposure_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera enable_auto_exposure False"/>
-    <node name="set_auto_exposure_depth" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/stereo_module enable_auto_exposure False"/>
+    <node name="set_brightness_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera brightness 0"/>
 
-    
-    <!-- Load parameters -->
-    <!-- <rosparam file="$(find encoderless_vs)/config/franka_config.yaml" command="load"/> -->
+    <!-- Launch binary image -->
+    <node name="start_pose" pkg="hri_merty" type="marker_detect.py" respawn="false" output="screen" />
     
     <!-- Launch binary image -->
-    <node name="binary_image_service" pkg="encoderless_vs" type="franka_bin_svc_server.py" respawn="false" output="screen" />
+    <node name="object_detection" pkg="hri_merty" type="object_detection.py" respawn="false" output="screen" />
 
     <!-- skeletonize and generate control points -->
-    <node name="control_points_gen_service" pkg="encoderless_vs" type="franka_cp_svc_server.py" respawn="false" output="screen" />
-
+    <node name="velocity_control" pkg="hri_merty" type="franka_visual_servoing.py" respawn="false" output="screen" />
     <!-- client node to test the pipeline -->
     <!-- <node name="control_points_gen_client" pkg="encoderless_vs" type="franka_cp_svc_client.py" respawn="false" output="screen" /> -->
 
