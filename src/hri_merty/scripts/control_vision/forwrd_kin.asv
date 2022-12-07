@@ -12,7 +12,7 @@ global joints_
 joints_ = zeros(7,1);
 
            % a       d     alpha  theta
-dh_params = [0       0.333 0      q(1);
+dh_params = [0       0.333 0      q(1)+pi/;
              0       0     -pi/2  q(2);
              0       0.316 pi/2   q(3);
              0.0825  0     pi/2   q(4);
