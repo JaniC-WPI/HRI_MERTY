@@ -10,7 +10,7 @@ function [phtm] = getPandaHTM(q, tftree)
     
     % get transform from left_camera_frame to head
     tf_1_2 = getTransform(tftree, 'panda_link1','panda_link2');
-    T_1_2 = HTM_from_tf(tf_1_2);
+    T_1_2 = HTM_from_tf(tf_1_2)
     
     % get transform from right_camera_optical_frame to right_camera_frame
     tf_2_3 = getTransform(tftree, 'panda_link2','panda_link3');
