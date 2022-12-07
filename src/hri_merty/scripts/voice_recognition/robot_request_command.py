@@ -15,13 +15,10 @@ wait_time = 5 # 5 seconds of verbal command recording
 # then set up the TTS engine
 def onStart(name): # using these just for debugging atm
     print("speaking now:")
-# def onWord(name, location, length):
-#     print("why is this happening to me")
 def onEnd(name, completed):
     print("done speaking") 
 engine = pyttsx3.init()
 engine.connect('started-utterance', onStart)
-# engine.connect('started-word', onWord)       
 engine.connect('finished-utterance', onEnd)
 
 # set up speech recording function definition: 
@@ -38,11 +35,11 @@ def decipher_speech(r, wait_time):
             which_obj(text)
             return text
         except sr.UnknownValueError as e:
-            # print(("Error: I didn't understand that, could you please repeat yourself by pressing 'space' again?"))
             engine.say("Error: I didn't understand that, could you please repeat yourself?")
             engine.runAndWait()
             decipher_speech(r,wait_time)
 # set up desired object determining function:
+# search user voice input for the relevant command information (RED, YELLOW, BLUE, GREEN)
 def which_obj(user_input):
     if "red" in user_input:
         engine.say("red")
@@ -64,7 +61,7 @@ engine.say("Which block would you like me to pick up?")
 engine.runAndWait()
 # record user voice input (somewhere between 5 to 10 seconds of recording)
 uin = decipher_speech(r, wait_time)
-# search user voice input for the relevant command information (RED, YELLOW, BLUE, GREEN)
+
 #   if relevant command is not found, ask user again (formulate this as a try catch)
 
 #   if relevant command is found, say which object will be picked up
