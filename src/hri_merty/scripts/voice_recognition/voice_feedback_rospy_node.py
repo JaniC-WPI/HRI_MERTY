@@ -3,9 +3,7 @@
 # https://pyttsx3.readthedocs.io/en/latest/engine.html#examples 
 # https://github.com/D4rkdev1987/virtual-assistant/blob/master/virtualassistant.py 
 
-# python TTS and STT imports
-from multiprocessing.connection import wait
-from pickle import TRUE
+# python TTS and STT import
 import speech_recognition as sr
 import pyttsx3
 import time
@@ -26,9 +24,6 @@ def onStart(name): # using these just for debugging atm
     print("speaking now:")
 def onEnd(name, completed):
     print("done speaking") 
-engine = pyttsx3.init()
-engine.connect('started-utterance', onStart)
-engine.connect('finished-utterance', onEnd)
 
 # desired block color command flag message definition:
 cmd_flag = String()
@@ -120,9 +115,16 @@ if __name__ == '__main__':
     # set up ROS subscriber for voice feedback requests
     rospy.Subscriber("/voice/feedback",Int64,voiceFeedbackCallback)
     # set up a reasonable rate for the rospy loop for handling everything
-    r = rospy.Rate(10) # 10Hz to start
+    rate = rospy.Rate(10) # 10Hz to start
     vF_req = -1 # case for initial ask to the user
+
+    engine = pyttsx3.init()
+    engine.connect('started-utterance', onStart)
+    engine.connect('finished-utterance', onEnd)
     while not rospy.is_shutdown():
         voice_state_machine(vF_req)
-        r.sleep()
+        rate.sleep()
+
+    rospy.spin()
+
 

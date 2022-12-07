@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/jc-merlab/HRI_MERTY/devel/lib;/home/jc-merlab/turtlebot_sim/devel/lib;/home/jc-merlab/mer_lab/ros_ws/devel/lib;/home/jc-merlab/rbe502_project/devel/lib;/home/jc-merlab/rbe502_ros/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/jc-merlab/HRI_MERTY/devel/lib;/home/jc-merlab/HRI_MERTY/devel/lib;/home/jc-merlab/turtlebot_sim/devel/lib;/home/jc-merlab/mer_lab/ros_ws/devel/lib;/home/jc-merlab/rbe502_project/devel/lib;/home/jc-merlab/rbe502_ros/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

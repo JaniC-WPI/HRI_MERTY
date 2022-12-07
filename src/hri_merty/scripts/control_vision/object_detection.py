@@ -31,13 +31,13 @@ error_vect = []
 
 i = 0
 
-def image_callback(ros_image):
-    print('got an image')
+def image_callback(img_msg):
     global bridge, i,img, ros_img, kernel, red_mask, blue_mask, green_mask
+    print("is image callbacl getting called")
+    ros_img = img_msg
     #convert ros_image into an opencv-compatible image
-    if ros_image is not None:
-      img = bridge.imgmsg_to_cv2(ros_image, "bgr8")
-
+    if ros_img is not None:
+      img = bridge.imgmsg_to_cv2(ros_img, "bgr8")
 
       hsvimg = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
       red_lower = np.array([0, 50, 50], np.uint8) #[17, 15, 100]
@@ -66,6 +66,7 @@ def image_callback(ros_image):
       blue_mask = cv2.dilate(blue_mask, kernel) 
       res_blue = cv2.bitwise_and(img, img, 
                                    mask = blue_mask) 
+
 
 def id_red(red_mask):
     global img, i, red_center
@@ -112,8 +113,9 @@ def id_green(green_mask):
 
 def flag_cb(msg):
     global color_flag, error_vect
+    print("flag call back getting called")
     color_flag = msg.data
-    
+    print(color_flag)
     if color_flag == 'blue' and ros_img is not None:      
         target = id_blue(blue_mask)    
         print(target)
@@ -122,31 +124,28 @@ def flag_cb(msg):
     elif color_flag == 'green' and ros_img is not None:       
         target = id_green(green_mask)     
     else:
-        target = [640, 480]
+        target = [640, 360]
 
     print(target)
     error_x = target[0] - 640    
     error_y = target[1] - 360
 
+    print(error_x, error_y)
     error_vect = Float64MultiArray()  
     error_vect.data = [error_x, error_y]    
-
- 
     
 def main():
   rospy.init_node('image_converter', anonymous=True)
-  #for turtlebot3 waffle
-  #image_topic="/camera/rgb/image_raw/compressed"
-  #for usb cam
-  #image_topic="/usb_cam/image_raw"
+
   image_sub = rospy.Subscriber("/camera/color/image_raw",Image, image_callback)
   flag_sub = rospy.Subscriber("/color/flag", String, flag_cb)
   voice_fb = rospy.Publisher("/voice/feedback", Int64, queue_size=1)
   vel_pub = rospy.Publisher("/velocity/vect", Float64MultiArray, queue_size=1)
-  #pub2 = rospy.Publisher("publishYGreen", Int64, queue_size=0.1)
+
   rate = rospy.Rate(10)
   while not rospy.is_shutdown():
     if color_flag is not None:
+      print(color_flag)
       vel_pub.publish(error_vect)
 
     rate.sleep()

@@ -4,8 +4,6 @@
     <node name="set_auto_exposure_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera enable_auto_exposure False"/>
     <node name="set_brightness_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera brightness 0"/>
 
-    <!-- Launch binary image -->
-    <node name="start_pose" pkg="hri_merty" type="marker_detect.py" respawn="false" output="screen" />
     
     <!-- Launch binary image -->
     <node name="object_detection" pkg="hri_merty" type="object_detection.py" respawn="false" output="screen" />
