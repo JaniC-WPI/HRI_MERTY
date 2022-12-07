@@ -17,7 +17,7 @@ dh_params = [0       0.333 0      q(1);
              0.088   0     pi/2   q(7)];
 
 % subscribe to robot joint states 
-%jointStateSub = rossubscriber("/ihmc_ros/atlas/output/joint_states",@jointStateCallback,"DataFormat","struct");
+%jointStateSub = rossubscriber("/franka_state_controller/joint_states",@jointStateCallback,"DataFormat","struct");
 % publish desired joint velocities to PANDA:
 %pandapub = rospublisher("/vs_dq3","std_msgs/Float64","DataFormat","struct");
          
