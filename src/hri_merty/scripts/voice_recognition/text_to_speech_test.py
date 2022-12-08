@@ -7,6 +7,9 @@ import pyttsx3
 
 print("Initializing text-to-speech engine")
 engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty("voice",voices[2].id)
+engine.setProperty("rate",151)
 print("finished initializing text-to-speech engine")
 
 engine.say("my first text-to-speech")
