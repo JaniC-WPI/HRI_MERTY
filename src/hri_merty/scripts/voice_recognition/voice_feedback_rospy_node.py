@@ -30,9 +30,17 @@ cmd_flag = String()
 
 # voice feedback callback definition
 vF_req = 0 # default voice feedback condition is none
-def voiceFeedbackCallback(data):
+vF_ = "" # default voice feedback is none
+global fbRec_
+fbRec_ = False # default feedback requested is none
+def objNotFoundCallback(data):
     vF_req = data.data
 
+def voiceFeedbackCallback(data):
+    vF_ = data.data
+    fbRec_ = True
+    # engine.say(data.data)
+    # engine.runAndWait()
 
 # set up speech recording function definition: 
 def decipher_speech(r, wait_time):
@@ -83,6 +91,7 @@ def which_obj(user_input):
         return False
 
 def voice_state_machine(state):
+    global fbRec_
     if(state == -1): # first desired object query
         engine.say("which block would you like me to pick up?")
         engine.runAndWait()
@@ -96,6 +105,10 @@ def voice_state_machine(state):
     elif(state == 0): # IDLE state, waiting for any feedbacks
         print("publishing flag: ", cmd_flag.data)
         flag_pub.publish(cmd_flag)
+        if fbRec_:
+            engine.say(vF_)
+            engine.runAndWait()
+            fbRec_ = False
     elif(state == 1): # RED object not found
         engine.say("Could not find the red object")
         engine.runAndWait()
@@ -116,10 +129,13 @@ if __name__ == '__main__':
     # set up ROS publisher for sending color flags
     flag_pub = rospy.Publisher("/color/flag",String,queue_size = 1)
     # set up ROS subscriber for voice feedback requests
-    rospy.Subscriber("/voice/feedback",Int64,voiceFeedbackCallback)
+    rospy.Subscriber("/voice/feedback",Int64,objNotFoundCallback)
+    rospy.Subscriber("/hri/text2speech",String,voiceFeedbackCallback)
     # set up a reasonable rate for the rospy loop for handling everything
     rate = rospy.Rate(10) # 10Hz to start
     vF_req = -1 # case for initial ask to the user
+    vF_ = "" # there is no initial voice feedback
+    fbRec_ = False # there is no initial feedback request
 
     engine = pyttsx3.init()
     # these connections are only for debugging, use if wondering why speech hangs
