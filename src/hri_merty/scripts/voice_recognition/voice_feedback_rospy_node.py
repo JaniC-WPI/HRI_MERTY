@@ -15,6 +15,8 @@ import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Int64
 
+
+
 # begin by setting up the STT speech recognizer:
 r = sr.Recognizer()
 wait_time = 5 # 5 seconds of verbal command recording
@@ -144,7 +146,7 @@ if __name__ == '__main__':
     # adjust speed of TTS:
     engine.setProperty("rate",151) # rate is in words per minute 
     voices = engine.getProperty("voice")
-    engine.setProperty("voice", voices[2].id) # voices are different per computer
+    # engine.setProperty("voice", voices[2].id) # voices are different per computer
 
     while not rospy.is_shutdown():
         voice_state_machine(vF_req)

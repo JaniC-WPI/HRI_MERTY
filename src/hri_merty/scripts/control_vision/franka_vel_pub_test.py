@@ -125,7 +125,7 @@ def main():
             # end_time_8 = start_time + to_wait    
             while end_time_3 < rospy.Time.now():
                 pub.publish(joint_vel_00)
-                status = 0.0
+                status = "pick"
                 stop_pub.publish(status)
             print("we have checked enough")
             

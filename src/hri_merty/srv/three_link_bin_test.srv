@@ -1,4 +1,0 @@
-int64 input
----
-sensor_msgs/Image bin
-sensor_msgs/Image rgb
