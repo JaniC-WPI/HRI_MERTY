@@ -5,14 +5,18 @@
     <node name="set_brightness_rgb" pkg="dynamic_reconfigure" type="dynparam" args="set /camera/rgb_camera brightness 0"/>
 
     
-    <!-- Launch binary image -->
+    <!-- Detect object on the basis of voice command -->
     <node name="object_detection" pkg="hri_merty" type="object_detection.py" respawn="false" output="screen" />
 
-    <!-- skeletonize and generate control points -->
+    <!-- Visual servoing on the basis of object center -->
     <node name="velocity_control" pkg="hri_merty" type="franka_visual_servoing.py" respawn="false" output="screen" />
-    <!-- client node to test the pipeline -->
-    <!-- <node name="velocity_control" pkg="hri_merty" type="franka_vel_pub_test.py" respawn="false" output="screen" /> -->
 
+    <!-- Visual servoing closer to the object -->
+    <node name="get_closer_to_object" pkg="hri_merty" type="franka_vel_pub_test.py" respawn="false" output="screen" />
+
+    <!-- pick up desried object -->
+    <node name="pick_and_place" pkg="hri_merty" type="franka_skel_grasp.py" respawn="false" output="screen" />
+   
    
 </launch>
 
