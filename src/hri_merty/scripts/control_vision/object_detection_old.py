@@ -25,8 +25,8 @@ red_mask = None
 blue_mask = None
 green_mask = None
 marker_center = None
-error_x = None
-error_y = None
+error_x = 0
+error_y = 0
 error_vect = []
 
 i = 0
@@ -70,8 +70,7 @@ def image_callback(img_msg):
 
 def id_red(red_mask):
     global img, i, red_center
-    opening = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)
-    
+    opening = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)    
     x, y, w, h = cv2.boundingRect(opening)
     red_center = [x, y]
     cv2.rectangle(img, (x, y), (x+w, y + h), (0, 255, 0), 3)
@@ -82,15 +81,15 @@ def id_red(red_mask):
     return red_center
 
 def id_blue(blue_mask):
-    global img, i, blue_center
+    global img, i, blue_center, img
     print("is it even getting caled")
-    opening = cv2.morphologyEx(blue_mask, cv2.MORPH_OPEN, kernel)
-    
+    opening = cv2.morphologyEx(blue_mask, cv2.MORPH_OPEN, kernel)    
     x, y, w, h = cv2.boundingRect(opening)
     blue_center = [x, y]
     cv2.rectangle(img, (x, y), (x+w, y + h), (0, 255, 0), 3)
     cv2.circle(img, (np.int64(x+w/2), np.int64(y+h/2)), 5, (0, 0, 255), -1) 
-
+    cv2.circle(img, (640, 360), 5, (255, 0, 0), -1)
+    print(error_x, error_y)
     cv2.imwrite('/home/jc-merlab/Pictures/Merty/saved_images/blue/image_capture_' + str(i) + '.jpg', img)
     i = i+1
 
@@ -99,12 +98,10 @@ def id_blue(blue_mask):
 def id_green(green_mask):          
     global img, i, green_center
     opening = cv2.morphologyEx(green_mask, cv2.MORPH_OPEN, kernel)
-    
     x, y, w, h = cv2.boundingRect(opening)
     green_center = [x,y]
     cv2.rectangle(img, (x, y), (x+w, y + h), (0, 255, 0), 3)
     cv2.circle(img, (np.int64(x+w/2), np.int64(y+h/2)), 5, (0, 0, 255), -1) 
-
     cv2.imwrite('/home/jc-merlab/Pictures/Merty/saved_images/green/image_capture_' + str(i) + '.jpg', img)
     i = i+1
 
@@ -112,13 +109,13 @@ def id_green(green_mask):
 
 
 def flag_cb(msg):
-    global color_flag, error_vect
+    global color_flag, error_vect, error_x, error_y
     print("flag call back getting called")
     color_flag = msg.data
     print(color_flag)
     if color_flag == 'blue' and ros_img is not None:      
         target = id_blue(blue_mask)    
-        print(target)
+        # print(target)
     elif color_flag == 'red' and ros_img is not None:      
         target = id_red(red_mask)        
     elif color_flag == 'green' and ros_img is not None:       
@@ -126,14 +123,15 @@ def flag_cb(msg):
     else:
         target = [640, 360]
 
-    print(target)
+    # print(target)
     error_x = target[0] - 640    
     error_y = target[1] - 360
 
-    print(error_x, error_y)
+    # print(error_x, error_y)
     error_vect = Float64MultiArray()  
     error_vect.data = [error_x, error_y]    
-    
+    # print(error_vect.data)
+
 def main():
   rospy.init_node('image_converter', anonymous=True)
 

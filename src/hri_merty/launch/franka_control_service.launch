@@ -11,7 +11,7 @@
     <!-- skeletonize and generate control points -->
     <node name="velocity_control" pkg="hri_merty" type="franka_visual_servoing.py" respawn="false" output="screen" />
     <!-- client node to test the pipeline -->
-    <!-- <node name="control_points_gen_client" pkg="encoderless_vs" type="franka_cp_svc_client.py" respawn="false" output="screen" /> -->
+    <!-- <node name="velocity_control" pkg="hri_merty" type="franka_vel_pub_test.py" respawn="false" output="screen" /> -->
 
    
 </launch>

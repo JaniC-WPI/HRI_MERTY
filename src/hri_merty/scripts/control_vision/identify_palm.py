@@ -50,7 +50,7 @@ def img_callback(msg):
                             cv2.FONT_HERSHEY_COMPLEX,
                             0.9, (0, 255, 0), 2)
 
-                text2speech = "Please put out your hand correctly"
+                text2speech = "I can see both hands. Please put out your hand correctly"
 
             # If any hand present
             else:
@@ -59,7 +59,7 @@ def img_callback(msg):
                     # Return whether it is Right or Left Hand
                     label = MessageToDict(i)['classification'][0]['label']
 
-                    if label == 'Left' and (pinky_tip_x < thumb_tip_x):
+                    if label == 'Left' and (pinky_tip_x > thumb_tip_x):
                         print("Palm Open")
 
                         # Display 'Left Hand' on
@@ -77,7 +77,7 @@ def img_callback(msg):
                         text2speech = "Thank you. Now I am going to place the object on your palm"
 
 
-                    elif label == 'Left' and (pinky_tip_x > thumb_tip_x):
+                    elif label == 'Left' and (pinky_tip_x < thumb_tip_x):
                         print("Palm Closed")
 
                         # Display 'Left Hand' on
@@ -94,7 +94,7 @@ def img_callback(msg):
 
                         text2speech = "Please put out your hand correctly"
 
-                    elif label == 'Right' and (pinky_tip_x > thumb_tip_x):
+                    elif label == 'Right' and (pinky_tip_x < thumb_tip_x):
                         print("Palm Open")
 
                         # Display 'Left Hand' on
@@ -112,7 +112,7 @@ def img_callback(msg):
                         text2speech = "Thank you. Now I am going to place the object on your palm"
 
 
-                    elif label == 'Right' and (pinky_tip_x < thumb_tip_x):
+                    elif label == 'Right' and (pinky_tip_x > thumb_tip_x):
                         print("Palm Closed")
 
                         # Display 'Left Hand' on
@@ -132,7 +132,7 @@ def img_callback(msg):
 
             # Display Video and when 'q'
             # is entered, destroy the window
-            cv2.imwrite('/home/jc-merlab/HRI_MERTY/images/hand.jpg', cv_img)
+            cv2.imwrite('/home/jc-merlab/Pictures/Merty/saved_images/hands/hand.jpg', cv_img)
 
 
 
