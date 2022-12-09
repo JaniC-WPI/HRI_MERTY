@@ -16,9 +16,8 @@ from std_msgs.msg import Float64MultiArray, Float32MultiArray, Int32
 # j2_vel = 0 # global variables for velocities to be published to joint2
 # j4_vel = 0 # global variables for velocities to be published to joint2
 
-vel_matrix = [] # global variable to publish group joint velocity
+vel_matrix = None # global variable to publish group joint velocity
 linvelimg = np.array([[0], [0], [0]]) # global linear velocity in base frame
-
 # global end effector position
 ee_x = 0
 ee_y = 0
@@ -37,6 +36,7 @@ min_error_bound = -1
 # global angular velocity
 j1_vel = 0
 j3_vel = 0
+j4_vel = 0
 
 # global joint angles
 q0 = None
@@ -44,7 +44,7 @@ q2 = None
 
 def joint_callback(msg):
     print("Joint Callback called")
-    global vel_matrix, j1_vel, j3_vel, q1, q3
+    global vel_matrix, j1_vel, j3_vel, j4_vel, q1, q3
 
     # updating the joint positions from /joint_states topic
     q0 = msg.position[0]
@@ -76,54 +76,76 @@ def joint_callback(msg):
 
     Jr = [[(11*np.cos(q5)*(np.cos(q0 + q1)*np.cos(q3) - np.sin(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 - (48*np.cos(q4)*(np.cos(q0 + q1)*np.sin(q3) + np.sin(q0 + q1)*np.cos(q2)*np.cos(q3)))/125 - \
         (333*np.sin(q0))/1000 - (11*np.sin(q5)*(np.cos(q0 + q1)*np.cos(q4)*np.sin(q3) + np.sin(q0 + q1)*np.sin(q2)*np.sin(q4) + np.sin(q0 + q1)*np.cos(q2)*np.cos(q3)*np.cos(q4)))/125 - \
-        (33*np.cos(q0 + q1)*np.cos(q3))/400 - (79*np.sin(q0 + q1)*np.cos(q2))/250 - (33*np.sin(q0 + q1)*np.sin(q2))/400 + (33*np.sin(q0 + q1)*np.cos(q2)*np.sin(q3))/400 - \
-        (48*np.sin(q0 + q1)*np.sin(q2)*np.sin(q4))/125, \
-        (np.cos(q0 + q1)*(165*np.cos(q2) - 632*np.sin(q2) + 768*np.cos(q2)*np.sin(q4) + 165*np.sin(q2)*np.sin(q3) - \
-        768*np.cos(q3)*np.cos(q4)*np.sin(q2) - 176*np.cos(q5)*np.sin(q2)*np.sin(q3) + 176*np.cos(q2)*np.sin(q4)*np.sin(q5) - 176*np.cos(q3)*np.cos(q4)*np.sin(q2)*np.sin(q5)))/2000],
-        [(333*np.cos(q0))/1000 - (48*np.cos(q4)*(np.sin(q0 + q1)*np.sin(q3) - np.cos(q0 + q1)*np.cos(q2)*np.cos(q3)))/125 + \
-        (11*np.cos(q5)*(np.sin(q0 + q1)*np.cos(q3) + np.cos(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 + (11*np.sin(q5)*(np.cos(q0 + q1)*np.sin(q2)*np.sin(q4) - \
-        np.sin(q0 + q1)*np.cos(q4)*np.sin(q3) + np.cos(q0 + q1)*np.cos(q2)*np.cos(q3)*np.cos(q4)))/125 + (79*np.cos(q0 + q1)*np.cos(q2))/250 + (33*np.cos(q0 + q1)*np.sin(q2))/400 - \
-        (33*np.sin(q0 + q1)*np.cos(q3))/400 - (33*np.cos(q0 + q1)*np.cos(q2)*np.sin(q3))/400 + (48*np.cos(q0 + q1)*np.sin(q2)*np.sin(q4))/125, (np.sin(q0 + q1)*(165*np.cos(q2) - \
-        632*np.sin(q2) + 768*np.cos(q2)*np.sin(q4) + 165*np.sin(q2)*np.sin(q3) - 768*np.cos(q3)*np.cos(q4)*np.sin(q2) - 176*np.cos(q5)*np.sin(q2)*np.sin(q3) + \
-        176*np.cos(q2)*np.sin(q4)*np.sin(q5) - 176*np.cos(q3)*np.cos(q4)*np.sin(q2)*np.sin(q5)))/2000]]
+            (33*np.cos(q0 + q1)*np.cos(q3))/400 - (79*np.sin(q0 + q1)*np.cos(q2))/250 - (33*np.sin(q0 + q1)*np.sin(q2))/400 + (33*np.sin(q0 + q1)*np.cos(q2)*np.sin(q3))/400 - \
+                (48*np.sin(q0 + q1)*np.sin(q2)*np.sin(q4))/125,    (np.cos(q0 + q1)*(165*np.cos(q2) - 632*np.sin(q2) + 768*np.cos(q2)*np.sin(q4) + 165*np.sin(q2)*np.sin(q3) - \
+                    768*np.cos(q3)*np.cos(q4)*np.sin(q2) - 176*np.cos(q5)*np.sin(q2)*np.sin(q3) + 176*np.cos(q2)*np.sin(q4)*np.sin(q5) - 176*np.cos(q3)*np.cos(q4)*np.sin(q2)*np.sin(q5)))/2000, \
+                        (33*np.sin(q0 + q1)*np.sin(q3))/400 - (11*np.cos(q5)*(np.sin(q0 + q1)*np.sin(q3) - np.cos(q0 + q1)*np.cos(q2)*np.cos(q3)))/125 - (48*np.cos(q4)*(np.sin(q0 + q1)*np.cos(q3) + \
+                            np.cos(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 - (11*np.cos(q4)*np.sin(q5)*(np.sin(q0 + q1)*np.cos(q3) + np.cos(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 - \
+                                (33*np.cos(q0 + q1)*np.cos(q2)*np.cos(q3))/400],
+            [(333*np.cos(q0))/1000 - (48*np.cos(q4)*(np.sin(q0 + q1)*np.sin(q3) - np.cos(q0 + q1)*np.cos(q2)*np.cos(q3)))/125 + \
+                (11*np.cos(q5)*(np.sin(q0 + q1)*np.cos(q3) + np.cos(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 + (11*np.sin(q5)*(np.cos(q0 + q1)*np.sin(q2)*np.sin(q4) - \
+                    np.sin(q0 + q1)*np.cos(q4)*np.sin(q3) + np.cos(q0 + q1)*np.cos(q2)*np.cos(q3)*np.cos(q4)))/125 + (79*np.cos(q0 + q1)*np.cos(q2))/250 + (33*np.cos(q0 + q1)*np.sin(q2))/400 - \
+                        (33*np.sin(q0 + q1)*np.cos(q3))/400 - (33*np.cos(q0 + q1)*np.cos(q2)*np.sin(q3))/400 + (48*np.cos(q0 + q1)*np.sin(q2)*np.sin(q4))/125,    (np.sin(q0 + q1)*(165*np.cos(q2) - \
+                            632*np.sin(q2) + 768*np.cos(q2)*np.sin(q4) + 165*np.sin(q2)*np.sin(q3) - 768*np.cos(q3)*np.cos(q4)*np.sin(q2) - 176*np.cos(q5)*np.sin(q2)*np.sin(q3) + \
+                                176*np.cos(q2)*np.sin(q4)*np.sin(q5) - 176*np.cos(q3)*np.cos(q4)*np.sin(q2)*np.sin(q5)))/2000, (48*np.cos(q4)*(np.cos(q0 + q1)*np.cos(q3) - \
+                                    np.sin(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 + (11*np.cos(q5)*(np.cos(q0 + q1)*np.sin(q3) + np.sin(q0 + q1)*np.cos(q2)*np.cos(q3)))/125 - \
+                                        (33*np.cos(q0 + q1)*np.sin(q3))/400 + (11*np.cos(q4)*np.sin(q5)*(np.cos(q0 + q1)*np.cos(q3) - np.sin(q0 + q1)*np.cos(q2)*np.sin(q3)))/125 - \
+                                            (33*np.sin(q0 + q1)*np.cos(q2)*np.cos(q3))/400],\
+            [ 0, (33*np.cos(q2)*np.sin(q3))/400 - (33*np.sin(q2))/400 - (79*np.cos(q2))/250 - (48*np.sin(q2)*np.sin(q4))/125 - (11*np.sin(q5)*(np.sin(q2)*np.sin(q4) + \
+                np.cos(q2)*np.cos(q3)*np.cos(q4)))/125 - (48*np.cos(q2)*np.cos(q3)*np.cos(q4))/125 - (11*np.cos(q2)*np.cos(q5)*np.sin(q3))/125,  \
+                    (np.sin(q2)*(165*np.cos(q3) - 176*np.cos(q3)*np.cos(q5) + 768*np.cos(q4)*np.sin(q3) + 176*np.cos(q4)*np.sin(q3)*np.sin(q5)))/2000]]
+ 
 
     # getting the inverse of Jacobian
     Jrinv = np.linalg.inv(Jr)
 
+    # print(linvelimg)
     # conveting base frame linear velocity to list for easier computation
     linvel = linvelimg.tolist()
 
-    linvel_mat = [[linvel[0][0]], [linvel[1][0]]]    
+    linvel_mat = [[linvel[0][0]], [linvel[1][0]], [linvel[2][0]]]    
 
     # matrix to generate angular velocities
-    Jvel_matrix = (np.matmul(Jrinv, linvel_mat)).tolist()
+    Jvel_matrix = (np.dot(Jrinv, linvel_mat)).tolist()
 
     # velocities on joint 2 and joint 4
     j1_vel = (Jvel_matrix[0][0])
     j3_vel = (Jvel_matrix[1][0])
+    j4_vel = (Jvel_matrix[2][0])
 
     # adding joint limits for optimized robot motion
     if j1_vel > max_vel_lim:
-        j1_vel = 0.2
+        j1_vel = 0.02
     
     elif j1_vel < min_vel_lim:
-        j1_vel = -0.2
+        j1_vel = -0.02
 
     # Similar adjustments as applied on joint2    
     if j3_vel > max_vel_lim:
-        j3_vel = 0.2
+        j3_vel = 0.02
     
     elif j3_vel < min_vel_lim :
-        j3_vel = -0.2   
+        j3_vel = -0.02   
+
+    if j4_vel > max_vel_lim:
+        j4_vel = 0.005
+    
+    elif j4_vel < min_vel_lim :
+        j4_vel = -0.005   
+
+
   
     # Stopping condition
-    if (error_x is not None) and (error_y is not None) and (min_error_bound < error_x < max_error_bound) and (min_error_bound <= error_y <= max_error_bound):
+    if (error_x is not None) and (error_y is not None) and (min_error_bound <= error_x <= max_error_bound) and (min_error_bound <= error_y <= max_error_bound):
         vel = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]    
     else:
-        vel = [j1_vel, 0.0, j3_vel, 0.0, 0.0, 0.0, 0.0]
+        vel = [j1_vel, 0.0, j3_vel, -j4_vel, 0.0, 0.0, 0.0]
         # rospy.signal_shutdown("Shutting Down")
     
     vel_matrix = vel
+    print(vel_matrix)
+
+    
 
 def vs_callback(msg):
     global linvelimg, xdotee, ydotee, error_x, error_y  
@@ -132,16 +154,17 @@ def vs_callback(msg):
     error_x = np.int64(msg.data[0])
     error_y = np.int64(msg.data[1])
 
+    print("Error X and Y", error_x, error_y)
+
     # rotation between image frame and base frame
     # the base frame is rotated +ve 180 around image frame y-axis and then +90 degrees around 
     # current x-axis after the first rotation
 
     # r_img = np.matrix([[-1, 0, 0], [0, 0, 1], [0, 1, 0]])
-
-
     # Applied gain on error
-    xgain = 0.001
-    ygain = 0.001
+    xgain = -0.0001
+    ygain = -0.0001
+    zgain = 0.0001
     
     # condition to make the robot move if error_bound is reached before reaching goal position.
     # if (error_x is not None) and (error_y is not None) and (min_error_bound <= error_x <= max_error_bound) and (min_error_bound <= error_y <= max_error_bound):
@@ -151,12 +174,10 @@ def vs_callback(msg):
     # error between current and goal end effector position
     xdotee = msg.data[0]*xgain
     ydotee = msg.data[1]*ygain
+    zdotee = zgain
 
-    linvelimg = np.array([[xdotee],[-ydotee],[0]]) # linear end effector velocity in image frame    
-    # linvelbase = np.dot(r_img, linvelimg) # end effector velocity with respect to base frame    
-    
-    
-    
+    linvelimg = np.array([[xdotee],[ydotee],[0]]) # linear end effector velocity in image frame    
+    # linvelbase = np.dot(r_img, linvelimg) # end effector velocity with respect to base frame        
 
 def main():    
     # Initialize ROS
@@ -190,12 +211,12 @@ def main():
     # # creating a csv record file for updated joint2 and joint4 angles
     # f4 = open('joint_angles.csv', 'w')
     # writer_j_pos = csv.writer(f4)
-    # writer_j_pos.writerow(['Joint2Angle', 'Joint4Angle'])
-    
-    velocity = Float64MultiArray()
-    velocity.data = vel_matrix
-    
-    while not rospy.is_shutdown():        
+    # writer_j_pos.writerow(['Joint2Angle', 'Joint4Angle'])   
+   
+
+    while not rospy.is_shutdown():  
+        velocity = Float64MultiArray()
+        velocity.data = vel_matrix      
         vel_pub.publish(velocity)              
 
         # # add non-zero joint velocities in the csv file
