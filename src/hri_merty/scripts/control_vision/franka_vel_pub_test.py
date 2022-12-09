@@ -61,28 +61,32 @@ def main():
     #rostopic pub /vel/status std_msgs/Float64 "data: 0.0"
     # while not rospy.is_shutdown():
     count = 1
-    dur = 1.5
+    dur = 2
 
     # Latest changes
 
     while not rospy.is_shutdown():
-        print(control_flag)
+            # print(control_flag)
         if control_flag == True:
             start_time = rospy.Time.now()
-            to_wait = rospy.Duration(count*dur)
-            end_time_1 = start_time + to_wait    
+            to_wait = rospy.Duration(3)
+            end_time_1 = start_time + to_wait
+            print(start_time)
+            print(end_time_1)    
             while rospy.Time.now() < end_time_1:
                 # print("We need to check the first one")
                 pub.publish(joint_vel_01)
             count+=1
             start_time = rospy.Time.now()
-            to_wait = rospy.Duration(count*dur)
+            to_wait = rospy.Duration(3)
             end_time_2 = start_time + to_wait    
+            print(start_time)
+            print(end_time_2)
             while end_time_1 < rospy.Time.now() < end_time_2:
                 pub.publish(joint_vel_02)
             count+=1
             start_time = rospy.Time.now()
-            to_wait = rospy.Duration(count*dur)
+            to_wait = rospy.Duration(3)
             end_time_3 = start_time + to_wait    
             while end_time_2 < rospy.Time.now() < end_time_3:
                 pub.publish(joint_vel_03)

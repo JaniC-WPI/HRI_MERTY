@@ -13,6 +13,7 @@ from google.protobuf.json_format import MessageToDict
 bridge = CvBridge()
 ros_img = None
 text2speech = None
+speech_pub = None
 
 def img_callback(msg):
     global ros_img, text2speech
@@ -24,7 +25,6 @@ def img_callback(msg):
 
     if ros_img is not None:
         control_flag = True
-    print("Control Flag? ", control_flag)
     if control_flag == True:
         cv_img = bridge.imgmsg_to_cv2(ros_img, "rgb8")
 
@@ -40,7 +40,16 @@ def img_callback(msg):
             for hand_landmarks in results.multi_hand_landmarks:
                 pinky_tip_x = hand_landmarks.landmark[mpHands.HandLandmark.PINKY_DIP].x
                 thumb_tip_x = hand_landmarks.landmark[mpHands.HandLandmark.THUMB_TIP].x
-                print(pinky_tip_x)
+                wrist_tip_x = hand_landmarks.landmark[mpHands.HandLandmark.THUMB_MCP].x*1280
+                wrist_tip_y = hand_landmarks.landmark[mpHands.HandLandmark.THUMB_MCP].y*720
+                mid_fing_x = hand_landmarks.landmark[mpHands.HandLandmark.MIDDLE_FINGER_MCP].x*1280
+                mid_fing_y = hand_landmarks.landmark[mpHands.HandLandmark.MIDDLE_FINGER_MCP].y*720
+                print("mid_fing", mid_fing_x, mid_fing_y)
+                print("wrist", wrist_tip_x, wrist_tip_y )
+
+                # mid_fing 599.7006607055664 435.47019481658936
+                # 524.8818969726562 453.1249666213989
+
 
 
             # Both Hands are present in image(frame)
@@ -51,6 +60,9 @@ def img_callback(msg):
                             0.9, (0, 255, 0), 2)
 
                 text2speech = "I can see both hands. Please put out your hand correctly"
+                speech_pub.publish(text2speech)
+                print(text2speech)
+
 
             # If any hand present
             else:
@@ -58,26 +70,7 @@ def img_callback(msg):
                 
                     # Return whether it is Right or Left Hand
                     label = MessageToDict(i)['classification'][0]['label']
-
-                    if label == 'Left' and (pinky_tip_x > thumb_tip_x):
-                        print("Palm Open")
-
-                        # Display 'Left Hand' on
-                        # left side of window
-                        # cv2.putText(img, label+' Hand',
-                        #             (20, 50),
-                        #             cv2.FONT_HERSHEY_COMPLEX,
-                        #             0.9, (0, 255, 0), 2)
-
-                        cv2.putText(cv_img, 'open palm',
-                                    (20, 50),
-                                    cv2.FONT_HERSHEY_COMPLEX,
-                                    0.9, (0, 255, 0), 2)
-
-                        text2speech = "Thank you. Now I am going to place the object on your palm"
-
-
-                    elif label == 'Left' and (pinky_tip_x < thumb_tip_x):
+                    if (label == 'Left') and (pinky_tip_x < thumb_tip_x):
                         print("Palm Closed")
 
                         # Display 'Left Hand' on
@@ -93,8 +86,9 @@ def img_callback(msg):
                                     0.9, (0, 255, 0), 2)
 
                         text2speech = "Please put out your hand correctly"
+                        speech_pub.publish(text2speech)
 
-                    elif label == 'Right' and (pinky_tip_x < thumb_tip_x):
+                    elif (label == 'Left') and (pinky_tip_x > thumb_tip_x):
                         print("Palm Open")
 
                         # Display 'Left Hand' on
@@ -109,10 +103,30 @@ def img_callback(msg):
                                     cv2.FONT_HERSHEY_COMPLEX,
                                     0.9, (0, 255, 0), 2)
 
-                        text2speech = "Thank you. Now I am going to place the object on your palm"
+                        if (515 <=mid_fing_x <=535) and (443 <=mid_fing_y <=463):
+                            text2speech = "Thank you. Now I am going to place the object on your palm"
+                            speech_pub.publish(text2speech)
+
+                    elif (label == 'Right') and (pinky_tip_x < thumb_tip_x):
+                        print("Palm Open")
+
+                        # Display 'Left Hand' on
+                        # left side of window
+                        # cv2.putText(img, label+' Hand',
+                        #             (20, 50),
+                        #             cv2.FONT_HERSHEY_COMPLEX,
+                        #             0.9, (0, 255, 0), 2)
+
+                        cv2.putText(cv_img, 'open palm',
+                                    (20, 50),
+                                    cv2.FONT_HERSHEY_COMPLEX,
+                                    0.9, (0, 255, 0), 2)
+                        if (590 <=mid_fing_x <=610) and (425 <=mid_fing_y <=445):
+                            text2speech = "Thank you. Now I am going to place the object on your palm"
+                            speech_pub.publish(text2speech)
 
 
-                    elif label == 'Right' and (pinky_tip_x > thumb_tip_x):
+                    elif (label == 'Right') and (pinky_tip_x > thumb_tip_x):
                         print("Palm Closed")
 
                         # Display 'Left Hand' on
@@ -128,16 +142,24 @@ def img_callback(msg):
                                     0.9, (0, 255, 0), 2)
 
                         text2speech = "Please put out your hand correctly"
+                        speech_pub.publish(text2speech)
+
+        else:
+            text2speech = "I cannot see any hands. Please put out your hand correctly" 
+            speech_pub.publish(text2speech)
+            print(text2speech)
+        
+                    
 
 
-            # Display Video and when 'q'
-            # is entered, destroy the window
-            cv2.imwrite('/home/jc-merlab/Pictures/Merty/saved_images/hands/hand.jpg', cv_img)
-
-
+        # Display Video and when 'q'
+        # is entered, destroy the window
+        cv2.imwrite('/home/jc-merlab/Pictures/Merty/saved_images/hands/hand.jpg', cv_img)
+            # i = i+1
 
 
 def main():
+    global speech_pub, text2speech
     # Initialize the node
     rospy.init_node('palm_identifier')
     print("is main getting called")
@@ -149,13 +171,13 @@ def main():
     # publish the text message to be converted to speech
 
     speech_pub = rospy.Publisher('/hri/text2speech/', String, queue_size=1)
-
+    # text2speech = String
     # publisher to publish flag to start control points svc
     # publish_string = rospy.Publisher("/franka/control_flag", Bool, queue_size = 1)
-    rate = rospy.Rate(5)
+    rate = rospy.Rate(1)
     while not rospy.is_shutdown():
         print("running while loop")
-        speech_pub.publish(text2speech)
+        # speech_pub.publish(text2speech)
     #     print("Camera K", camera_K)
     #     if camera_K is not None and control_flag == True:
     #         camera_ext = transform(tvec, quat)

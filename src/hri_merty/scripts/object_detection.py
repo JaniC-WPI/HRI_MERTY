@@ -103,7 +103,6 @@ def flag_cb(msg):
     print("flag call back getting called")
     color_flag = msg.data
     print(color_flag)
-        
     if (color_flag == 'blue') and (ros_img is not None):      
         target = blue_center 
         cv2.circle(cv_img, (np.int64(target[0]), np.int64(target[1])), 5, (0, 0, 255), -1) 
