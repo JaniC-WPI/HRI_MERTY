@@ -10,13 +10,6 @@ import time
 
 from sympy import vfield
 
-# ROS node imports
-import rospy
-from std_msgs.msg import String
-from std_msgs.msg import Int64
-
-
-
 # begin by setting up the STT speech recognizer:
 r = sr.Recognizer()
 wait_time = 5 # 5 seconds of verbal command recording
@@ -28,22 +21,14 @@ def onEnd(name, completed):
     print("done speaking") 
 
 # desired block color command flag message definition:
-cmd_flag = String()
+cmd_flag = "placeholder ^-^"
 
 # voice feedback callback definition
-state = 0 # default voice feedback condition is none
+state = 0 # robot state machine states
+vF_req = 0 # default voice feedback condition is none
 vF_ = "" # default voice feedback is none
 global fbRec_
 fbRec_ = False # default feedback requested is none
-def objNotFoundCallback(data):
-    print("OBJECT NOT FOUND CALLBACK TRIGGERED: OVERRIDING CURRENT STATE")
-    state = data.data
-
-def voiceFeedbackCallback(data):
-    vF_ = data.data
-    fbRec_ = True
-    # engine.say(data.data)
-    # engine.runAndWait()
 
 # set up speech recording function definition: 
 def decipher_speech(r, wait_time):
@@ -73,20 +58,17 @@ def which_obj(user_input):
     if ("red" in user_input) or ("Red" in user_input):
         engine.say("picking up the red object")
         engine.runAndWait()
-        cmd_flag.data = "red"
-        flag_pub.publish(cmd_flag)
+        cmd_flag = "red"
         return True
     elif ("green" in user_input) or ("Green" in user_input):
         engine.say("picking up the green object")
         engine.runAndWait()
-        cmd_flag.data = "green"
-        flag_pub.publish(cmd_flag)
+        cmd_flag = "green"
         return True
     elif ("blue" in user_input) or ("Blue" in user_input):
         engine.say("picking up the blue object")
         engine.runAndWait()
-        cmd_flag.data = "blue"
-        flag_pub.publish(cmd_flag)
+        cmd_flag = "blue"
         return True
     else:
         engine.say("invalid request, please ask for a valid-colored object on the table")
@@ -100,54 +82,47 @@ def voice_state_machine(state):
         engine.runAndWait()
         command_found_ = decipher_speech(r,wait_time)
         if command_found_:
+            vF_req = 0
             return 0 # move to state 0
         else:
-            return -1 # stay in state -1 to find right call
+            vF_req = -1 # just in case, ensure stays in state until valid object request is found
+            return -1 # stay in state -1
     elif(state == 0): # IDLE state, waiting for any feedbacks
-        print("publishing flag: ", cmd_flag.data)
-        flag_pub.publish(cmd_flag)
+        print("publishing flag: ", cmd_flag)
+        print("state ", state)
         if fbRec_:
             engine.say(vF_)
             engine.runAndWait()
             fbRec_ = False
-        return 0 # stay in awaiting callback state
+            return 1
+        return 0
     elif(state == 1): # RED object not found
         engine.say("Could not find the red object")
         engine.runAndWait()
-        return -1 # send back to the query state
+        vF_req = -1 # send back to the query state
     elif(state == 2): # BLUE object not found
         engine.say("Could not find the blue object")
         engine.runAndWait()
-        return -1 # send back to the query state
+        vF_req = -1 # send back to the query state
     elif(state == 3): # GREEN object not found
         engine.say("Could not find the green object")
         engine.runAndWait()
-        return -1 # send back to the query state
+        vF_req = -1 # send back to the query state
 
 # initialize ros node and main loop
 if __name__ == '__main__':
-    rospy.init_node('voiceFeedbackNode',anonymous=True)
-    
-    # set up ROS publisher for sending color flags
-    flag_pub = rospy.Publisher("/color/flag",String,queue_size = 1)
-    # set up ROS subscriber for voice feedback requests
-    rospy.Subscriber("/voice/feedback",Int64,objNotFoundCallback)
-    rospy.Subscriber("/hri/text2speech",String,voiceFeedbackCallback)
-    # set up a reasonable rate for the rospy loop for handling everything
-    rate = rospy.Rate(10) # 10Hz to start
-    state = -1 # case for initial ask to the user
-    vF_ = "" # there is no initial voice feedback
-    fbRec_ = False # there is no initial feedback request
+    state = -1
+    vF_req = -1 # case for initial ask to the user
+    vF_ = "Feedback Requested" # there is no initial voice feedback
+    fbRec_ = True # there is no initial feedback request
 
-    # set up TTS engine:
     engine = pyttsx3.init()
+    # these connections are only for debugging, use if wondering why speech hangs
+    # engine.connect('started-utterance', onStart)
+    # engine.connect('finished-utterance', onEnd)
     # adjust speed of TTS:
     engine.setProperty("rate",151) # rate is in words per minute 
-
-    while not rospy.is_shutdown():
-        state = voice_state_machine(state) # must ensure state is being changed, not rerun with same state
-        rate.sleep()
-
-    rospy.spin()
-
-
+    voices = engine.getProperty("voice")
+    # engine.setProperty("voice", voices[2].id) # voices are different per computer
+    while state != 1:
+        state = voice_state_machine(state)
